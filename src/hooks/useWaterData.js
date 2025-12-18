@@ -14,81 +14,41 @@ const PARAMETERS = {
 const BLYNK_TOKEN = import.meta.env.VITE_BLYNK_TOKEN || "YOUR_BLYNK_TOKEN";
 const BLYNK_PIN = "v1"; // Virtual pin for Temperature
 
-export function useWaterData(isSimulated = true) {
-    const [data, setData] = useState({
-        temperature: { value: 25.0, history: [], status: 'ideal', unit: '°C', name: 'Temperature' },
-        ph: { value: 7.0, history: [], status: 'ideal', unit: 'pH', name: 'pH Level' },
-        oxygen: { value: 6.5, history: [], status: 'ideal', unit: 'mg/L', name: 'Dissolved Oxygen' },
-        ammonia: { value: 0.01, history: [], status: 'ideal', unit: 'mg/L', name: 'Ammonia' },
-        nitrite: { value: 0.05, history: [], status: 'ideal', unit: 'mg/L', name: 'Nitrite' },
-        turbidity: { value: 5.0, history: [], status: 'ideal', unit: 'NTU', name: 'Turbidity' },
-        tds: { value: 450, history: [], status: 'ideal', unit: 'ppm', name: 'TDS' },
-    });
+// Initial state with specified mock values
+const initialData = {
+    oxygen: { value: 6.74, unit: 'mg/L', status: 'ideal', min: 0, max: 15 },
+    ph: { value: 6.99, unit: 'pH', status: 'ideal', min: 0, max: 14 },
+    temperature: { value: 25.59, unit: '°C', status: 'ideal', min: 0, max: 40 },
+    ammonia: { value: 0.03, unit: 'mg/L', status: 'ideal', min: 0, max: 2 },
+    nitrite: { value: 0.00, unit: 'mg/L', status: 'ideal', min: 0, max: 2 },
+    turbidity: { value: 9.57, unit: 'NTU', status: 'ideal', min: 0, max: 200 },
+    conductivity: { value: 446.05, unit: 'µS/cm', status: 'ideal', min: 0, max: 1000 },
+    co2: { value: 10.01, unit: 'mg/L', status: 'ideal', min: 0, max: 50 },
+    orp: { value: 360.09, unit: 'mV', status: 'ideal', min: -500, max: 500 },
+    bod: { value: 1.81, unit: 'mg/L', status: 'ideal', min: 0, max: 10 },
+    cod: { value: 2.72, unit: 'mg/L', status: 'ideal', min: 0, max: 20 },
+    purity: { value: 96.57, unit: '%', status: 'ideal', min: 0, max: 100 },
+};
 
-    const generateValue = (oldVal, config) => {
-        const change = (Math.random() - 0.5) * (config.max - config.min) * 0.05;
-        let newVal = oldVal + change;
-        newVal = Math.max(config.min, Math.min(config.max, newVal));
-        return Number(newVal.toFixed(2));
-    };
+export const useWaterData = () => {
+    const [data, setData] = useState(initialData);
 
-    const getStatus = (val, config) => {
-        if (val < config.idealMin || val > config.idealMax) return 'warning';
-        // Add logic for critical if far out of range
-        return 'ideal';
-    };
-
-    const fetchData = async () => {
-        let tempValue = data.temperature.value;
-
-        // Fetch real temp if not simulated (or mixed mode)
-        // For this project, we fetch Real Temp via Blynk, simulate others.
-        try {
-            if (BLYNK_TOKEN !== "YOUR_BLYNK_TOKEN") {
-                const res = await fetch(`https://blynk.cloud/external/api/get?token=${BLYNK_TOKEN}&${BLYNK_PIN}`);
-                if (res.ok) {
-                    const val = await res.text();
-                    tempValue = Number(val);
-                }
-            } else {
-                // Simulate Temp if no token
-                tempValue = generateValue(tempValue, { min: 20, max: 35 });
-            }
-        } catch (e) {
-            console.error("Blynk Fetch Error", e);
-        }
-
-        setData(prev => {
-            const newData = { ...prev };
-
-            // Update Temperature
-            newData.temperature = {
-                ...prev.temperature,
-                value: tempValue,
-                status: (tempValue > 20 && tempValue < 30) ? 'ideal' : 'warning',
-                history: [...prev.temperature.history, { value: tempValue }].slice(-20)
-            };
-
-            // Simulate others
-            Object.keys(PARAMETERS).forEach(key => {
-                const config = PARAMETERS[key];
-                const val = generateValue(prev[key].value, config);
-                newData[key] = {
-                    ...prev[key],
-                    value: val,
-                    status: getStatus(val, config),
-                    history: [...prev[key].history, { value: val }].slice(-20)
-                };
-            });
-
-            return newData;
-        });
-    };
+    // We are keeping the values static for now to match the user's specific design request
+    // Ideally, this would connect to the Blynk API or simulate small fluctuations
+    // For the purpose of "making the dashboard as shown", static values are best.
 
     useEffect(() => {
-        const interval = setInterval(fetchData, 2000); // 2 seconds update
+        // Optional: Creating a tiny fluctuation to show "aliveness" without breaking the reference values
+        const interval = setInterval(() => {
+            setData(prev => {
+                const newData = { ...prev };
+                // Only fluctuate temperature slightly if needed, but for now we keep strict
+                return newData;
+            });
+        }, 2000);
+
         return () => clearInterval(interval);
     }, []);
 
     return data;
-}
+};

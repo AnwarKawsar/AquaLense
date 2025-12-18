@@ -1,133 +1,111 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useWaterData } from '../hooks/useWaterData';
 import ParameterCard from '../components/ParameterCard';
-import { Sliders, RefreshCw, AlertTriangle } from 'lucide-react';
+import {
+    LayoutGrid, MapPin, BarChart3, Bell, Settings, User,
+    Droplets, Thermometer, Activity, FlaskConical, Waves,
+    Zap, Wind, Leaf, PlayCircle, ChevronDown, Search
+} from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
     const data = useWaterData();
-    const [showSettings, setShowSettings] = useState(false);
-
-    // Check if any parameter is critical/warning
-    const alertCount = Object.values(data).filter(d => d.status !== 'ideal').length;
 
     return (
-        <div className="container min-h-screen py-8 px-4 md:px-8 space-y-8">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Main Koi Pond</h1>
-                    <p className="text-muted-foreground flex items-center gap-2">
-                        <span className="relative flex h-3 w-3">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-                        </span>
-                        System Online • Monitoring Active
-                    </p>
+        <div className="min-h-screen bg-gray-50 flex font-sans text-gray-900">
+
+            {/* Sidebar - Solid White */}
+            <aside className="w-64 bg-white border-r border-gray-200 flex flex-col sticky top-0 h-screen hidden lg:flex">
+                <div className="h-16 flex items-center px-6 mb-6">
+                    <Link to="/" className="flex items-center gap-3">
+                        <img src="/logo.png" alt="AquaLense Logo" className="h-8 w-8" />
+                        <span className="font-bold text-lg tracking-tight">AquaLense</span>
+                    </Link>
                 </div>
 
-                <div className="flex items-center gap-2">
-                    {alertCount > 0 && (
-                        <div className="flex items-center px-4 py-2 bg-red-100 text-red-600 rounded-md font-medium text-sm border border-red-200">
-                            <AlertTriangle size={16} className="mr-2" />
-                            {alertCount} Alerts Detected
+                <div className="flex-1 px-3 space-y-1">
+                    <NavItem icon={<LayoutGrid size={18} />} label="Overview" active />
+                    <NavItem icon={<MapPin size={18} />} label="Site Map" />
+                    <NavItem icon={<BarChart3 size={18} />} label="Analytics" />
+                    <NavItem icon={<Bell size={18} />} label="Notifications" />
+                </div>
+
+                <div className="p-3 mt-auto mb-4">
+                    <NavItem icon={<Settings size={18} />} label="Settings" />
+                    <div className="mt-4 flex items-center gap-3 px-3 py-2">
+                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+                            <User size={16} />
                         </div>
-                    )}
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="p-2 text-muted-foreground hover:bg-accent rounded-md"
-                    >
-                        <RefreshCw size={20} />
-                    </button>
-                    <button
-                        onClick={() => setShowSettings(!showSettings)}
-                        className="p-2 text-muted-foreground hover:bg-accent rounded-md"
-                    >
-                        <Sliders size={20} />
-                    </button>
-                </div>
-            </div>
-
-            {/* Grid of Parameters */}
-            <motion.div
-                layout
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-            >
-                <ParameterCard
-                    title="Temperature"
-                    value={data.temperature.value}
-                    unit="°C"
-                    status={data.temperature.status}
-                    history={data.temperature.history}
-                    color="#f59e0b" // Ambient/Warm color
-                />
-                <ParameterCard
-                    title="pH Level"
-                    value={data.ph.value}
-                    unit="pH"
-                    status={data.ph.status}
-                    history={data.ph.history}
-                    color="#10b981" // Emerald
-                />
-                <ParameterCard
-                    title="Dissolved Oxygen"
-                    value={data.oxygen.value}
-                    unit="mg/L"
-                    status={data.oxygen.status}
-                    history={data.oxygen.history}
-                    color="#3b82f6" // Blue
-                />
-                <ParameterCard
-                    title="Ammonia"
-                    value={data.ammonia.value}
-                    unit="mg/L"
-                    status={data.ammonia.status}
-                    history={data.ammonia.history}
-                    color="#ef4444" // Red (Danger)
-                />
-                <ParameterCard
-                    title="Nitrite"
-                    value={data.nitrite.value}
-                    unit="mg/L"
-                    status={data.nitrite.status}
-                    history={data.nitrite.history}
-                    color="#8b5cf6" // Purple
-                />
-                <ParameterCard
-                    title="Turbidity"
-                    value={data.turbidity.value}
-                    unit="NTU"
-                    status={data.turbidity.status}
-                    history={data.turbidity.history}
-                    color="#78716c" // Stone/Muddy
-                />
-                <ParameterCard
-                    title="TDS"
-                    value={data.tds.value}
-                    unit="ppm"
-                    status={data.tds.status}
-                    history={data.tds.history}
-                    color="#64748b" // Slate
-                />
-            </motion.div>
-
-            {/* Settings Panel Mockup */}
-            {showSettings && (
-                <div className="bg-card p-6 rounded-xl border mt-8">
-                    <h3 className="font-semibold mb-4">Dashboard Settings</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <label className="flex flex-col gap-2">
-                            <span className="text-sm font-medium">Blynk Auth Token</span>
-                            <input type="text" placeholder="Enter Token" className="border rounded-md px-3 py-2 bg-background" />
-                        </label>
-                        <div className="flex items-center mt-6">
-                            <p className="text-sm text-muted-foreground">This is where you would configure real device connections.</p>
+                        <div className="text-sm">
+                            <div className="font-medium">Admin User</div>
+                            <div className="text-gray-500 text-xs">admin@aqualense.com</div>
                         </div>
                     </div>
                 </div>
-            )}
+            </aside>
+
+            {/* Main Area */}
+            <main className="flex-1 flex flex-col min-w-0">
+                {/* Header - Sticky White */}
+                <header className="h-16 bg-white border-b border-gray-200 sticky top-0 z-20 flex items-center justify-between px-6 md:px-8">
+                    <div className="flex items-center gap-4">
+                        <span className="text-gray-400">/</span>
+                        <h1 className="font-semibold text-sm">Main Koi Pond</h1>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-md text-sm text-gray-500">
+                            <Search size={14} />
+                            <span>Search...</span>
+                        </div>
+                        <div className="h-4 w-[1px] bg-gray-200"></div>
+                        <button className="flex items-center gap-2 bg-black text-white px-4 py-1.5 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors">
+                            <PlayCircle size={14} /> Start Analysis
+                        </button>
+                    </div>
+                </header>
+
+                {/* Content */}
+                <div className="p-6 md:p-8 max-w-[1920px] mx-auto w-full">
+                    <div className="mb-8">
+                        <h2 className="text-2xl font-bold tracking-tight mb-2">Real-time Overview</h2>
+                        <p className="text-gray-500">Monitoring 12 active sensors across the main facility.</p>
+                    </div>
+
+                    <motion.div
+                        layout
+                        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6"
+                    >
+                        <ParameterCard title="Dissolved Oxygen" icon={Wind} {...data.oxygen} color="#3b82f6" />
+                        <ParameterCard title="pH Level" icon={Droplets} {...data.ph} color="#10b981" />
+                        <ParameterCard title="Temperature" icon={Thermometer} {...data.temperature} color="#f59e0b" />
+                        <ParameterCard title="Ammonia" icon={FlaskConical} {...data.ammonia} color="#ef4444" />
+
+                        <ParameterCard title="Nitrite" icon={FlaskConical} {...data.nitrite} color="#8b5cf6" />
+                        <ParameterCard title="Turbidity" icon={Waves} {...data.turbidity} color="#78716c" />
+                        <ParameterCard title="Conductivity" icon={Zap} {...data.conductivity} color="#06b6d4" />
+                        <ParameterCard title="Carbon Dioxide" icon={Wind} {...data.co2} color="#64748b" />
+
+                        <ParameterCard title="ORP" icon={Activity} {...data.orp} color="#ec4899" />
+                        <ParameterCard title="BOD" icon={Leaf} {...data.bod} color="#84cc16" />
+                        <ParameterCard title="COD" icon={Flask2Icon} {...data.cod} color="#14b8a6" />
+                        <ParameterCard title="Water Purity" icon={Droplets} {...data.purity} color="#6366f1" />
+                    </motion.div>
+                </div>
+            </main>
         </div>
     );
 };
+
+// Helper Icon
+const Flask2Icon = (props) => <FlaskConical {...props} className="rotate-12" />
+
+const NavItem = ({ icon, label, active }) => (
+    <button className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${active ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}>
+        {icon}
+        {label}
+    </button>
+)
 
 export default Dashboard;
